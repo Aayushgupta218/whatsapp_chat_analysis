@@ -3,28 +3,17 @@ import pandas as pd
 
 def preprocess(data):
     try:
-        patterns = [
-            r'(\d{1,2}/\d{1,2}/\d{2,4}),\s(\d{1,2}:\d{2})\s-\s',
-            r'(\d{1,2}/\d{1,2}/\d{2,4}),\s(\d{1,2}:\d{2}:\d{2})\s-\s',
-            r'(\d{1,2}/\d{1,2}/\d{2,4}),\s(\d{1,2}:\d{2}\s(?:AM|PM|am|pm))\s-\s',
-            r'\[(\d{1,2}/\d{1,2}/\d{2,4}),\s(\d{1,2}:\d{2})\]',
-            r'\[(\d{1,2}/\d{1,2}/\d{2,4}),\s(\d{1,2}:\d{2}:\d{2}\s(?:AM|PM|am|pm))\]'
-        ]
-
-        for pattern in patterns:
-            messages = re.split(pattern, data)[1:]
-            dates = re.findall(pattern, data)
-            
-            if messages and dates:
-                break
+        pattern = r'(\d{1,2}/\d{1,2}/\d{2,4}),\s(\d{1,2}:\d{2})(?::\d{2})?\s?(?:AM|PM|am|pm)?\s-\s(.*?)(?=\n\d{1,2}/\d{1,2}/\d{2}|\Z)'
         
-        if not messages:
-            print("No messages found with any of the supported patterns")
+        matches = re.findall(pattern, data, re.DOTALL)
+        
+        if not matches:
+            print("No messages found with the supported pattern")
             return pd.DataFrame()
             
         processed_data = []
-        for date_match, time_match, message in zip(dates[::2], dates[1::2], messages[2::2]):
-            datetime_str = f"{date_match}, {time_match}"
+        for date, time, message in matches:
+            datetime_str = f"{date}, {time}"
             processed_data.append([datetime_str, message.strip()])
                 
         df = pd.DataFrame(processed_data, columns=['message_date', 'user_message'])
@@ -32,24 +21,22 @@ def preprocess(data):
         datetime_formats = [
             '%d/%m/%y, %H:%M',
             '%d/%m/%Y, %H:%M',
-            '%d/%m/%y, %H:%M:%S',
-            '%d/%m/%Y, %H:%M:%S',
-            '%d/%m/%y, %I:%M %p',
-            '%d/%m/%Y, %I:%M %p',
-            '%d/%m/%y, %I:%M:%S %p',
-            '%d/%m/%Y, %I:%M:%S %p'
+            '%m/%d/%y, %H:%M',  
+            '%m/%d/%Y, %H:%M'  
         ]
 
         for date_format in datetime_formats:
             try:
                 df['message_date'] = pd.to_datetime(df['message_date'], format=date_format)
                 df['only_date'] = df['message_date'].dt.date
+                print(f"Successfully parsed dates with format: {date_format}")
                 break
             except ValueError:
                 continue
         
         if 'only_date' not in df.columns:
             print("Could not parse dates with any known format")
+            print("Sample date values:", df['message_date'].head().tolist())
             return pd.DataFrame()
 
         df['year'] = df['message_date'].dt.year
@@ -79,4 +66,6 @@ def preprocess(data):
 
     except Exception as e:
         print(f"Error in preprocessing: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return pd.DataFrame()
