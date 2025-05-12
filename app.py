@@ -31,6 +31,44 @@ st.markdown("""
 
 st.sidebar.title("WhatsApp Chat Analyzer")
 
+st.markdown("""
+    <div style="text-align: center; padding: 20px;">
+        <h1>👋 Welcome to WhatsApp Chat Analyzer!</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+with st.expander("ℹ️ How to Use This Tool", expanded=True):
+    st.markdown("""
+    ### Steps to Analyze Your WhatsApp Chat:
+    
+    1. **Export Your Chat:**
+        * Open WhatsApp on your phone
+        * Go to the chat you want to analyze
+        * Tap ⋮ (three dots) > More > Export chat
+        * Choose 'Without Media'
+        * Send the exported file to your computer
+    
+    2. **Upload and Analyze:**
+        * Upload your chat file using the sidebar
+        * Select a user from the dropdown (or keep 'Overall')
+        * Click 'Analyze Chat' to see the results
+    
+    ### What You'll Get:
+    * 📊 Total messages, words, media, and links
+    * 📅 Monthly and daily activity patterns
+    * 🕒 Weekly activity heatmap
+    * 👥 Most active users (for group chats)
+    * 🔤 Word cloud and common words
+    * 😀 Emoji analysis
+    
+    ### Privacy Note:
+    Your chat data is processed locally and is not stored anywhere.
+    """)
+
+st.markdown("---")
+
+st.sidebar.markdown("### 📁 Upload Chat File")
+
 uploaded_file = st.sidebar.file_uploader("Choose a WhatsApp chat export file", type=['txt'])
 
 if uploaded_file is not None:
