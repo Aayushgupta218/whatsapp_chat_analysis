@@ -1,3 +1,4 @@
+import sentiment
 import streamlit as st
 import preprocessor
 import helper
@@ -8,6 +9,8 @@ import matplotlib.font_manager as fm
 from matplotlib.font_manager import FontProperties
 from pathlib import Path
 import warnings
+import sentiment
+
 
 emoji_font = FontProperties(fname=r'C:\Windows\Fonts\seguiemj.ttf')
 plt.rcParams['font.family'] = 'Segoe UI Emoji'
@@ -233,6 +236,42 @@ if uploaded_file is not None:
                                     height=400,
                                     use_container_width=True
                                 )
+                     # Sentiment Analysis
+                    with st.container():
+                          st.title("Sentiment Analysis")
+
+                          df_sentiment, sentiment_counts = sentiment.analyze_sentiment(df, selected_user)
+
+                          if selected_user == 'Overall':
+                            with st.container():
+                              st.markdown("### Sentiment by User")
+                              sentiment_by_user = df_sentiment.groupby('user')['sentiment'].value_counts().unstack().fillna(0)
+                              st.dataframe(sentiment_by_user.style.format(precision=0))
+
+
+                          if not sentiment_counts.empty:
+                               col1, col2 = st.columns(2)
+
+                               with col1:
+                                 st.markdown("### Sentiment Distribution")
+                                 fig, ax = plt.subplots()
+                                 ax.pie(
+                                    sentiment_counts['Count'], 
+                                    labels=sentiment_counts['Sentiment'], 
+                                    autopct='%1.1f%%', 
+                                    startangle=140,
+                                    colors=['green', 'red', 'grey']
+                                )
+                                 ax.axis('equal')
+                                 st.pyplot(fig)
+
+                               with col2:
+                                 st.markdown("### Sentiment Counts Table")
+                                 st.dataframe(sentiment_counts)
+
+                          else:
+                            st.info("Not enough text data to analyze sentiment.")
+
 
                     st.success("Analysis completed successfully!")
                     
