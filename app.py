@@ -1,5 +1,5 @@
-# import nltk
-# nltk.download('vader_lexicon')
+import nltk
+nltk.download('vader_lexicon')
 import sentiment
 import streamlit as st
 import preprocessor
